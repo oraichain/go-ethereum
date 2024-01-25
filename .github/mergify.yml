@@ -1,0 +1,31 @@
+# Mergify is a Github app that automates workflows.
+# It is used by kava-labs/go-ethereum to help automate backporting to previous releases.
+
+# For details on this file, see https://docs.mergify.com/getting-started/#configuration
+# For backport-specific details, see https://docs.mergify.com/workflow/actions/backport
+
+defaults:
+  actions:
+    backport:
+      assignees:
+        - "{{ author }}"
+
+pull_request_rules:
+  # one PR label to rule them all
+  - name: Backport patches to all kava/release/* branches
+    conditions:
+      - base=master
+      - label=backport/all
+    actions:
+      backport:
+        branches:
+          - kava/release/1.10
+
+  - name: Backport patches to the kava/release/1.10 branch
+    conditions:
+      - base=master
+      - label=backport/1.10
+    actions:
+      backport:
+        branches:
+          - kava/release/1.10
