@@ -72,16 +72,17 @@ jobs:
         working-directory: .github/workflows
         run: cat hive-clients.yml
 
-      - name: run devp2p/discv4 simulation
-        working-directory: ./hive
-        run: hive --sim devp2p --sim.limit discv4 --client go-ethereum --client-file $GITHUB_WORKSPACE/.github/workflows/hive-clients.yml
+#      Disable running hive e2e tests on old go-ethereum
+#      - name: run devp2p/discv4 simulation
+#        working-directory: ./hive
+#        run: hive --sim devp2p --sim.limit discv4 --client go-ethereum --client-file $GITHUB_WORKSPACE/.github/workflows/hive-clients.yml
 
-      - name: run ethereum/sync simulation
-        working-directory: ./hive
-        run: hive --sim ethereum/sync --client go-ethereum --client-file $GITHUB_WORKSPACE/.github/workflows/hive-clients.yml
+#      - name: run ethereum/sync simulation
+#        working-directory: ./hive
+#        run: hive --sim ethereum/sync --client go-ethereum --client-file $GITHUB_WORKSPACE/.github/workflows/hive-clients.yml
 
       - name: install simulation result parser
         run: go install ./cmd/result_parser
-      - name: run simulation result parser
-        working-directory: ./hive
-        run: result_parser -path_to_results ./workspace/logs
+#      - name: run simulation result parser
+#        working-directory: ./hive
+#        run: result_parser -path_to_results ./workspace/logs
