@@ -47,3 +47,10 @@ profile.cov
 /dashboard/assets/package-lock.json
 
 **/yarn-error.log
+logs/
+
+tests/spec-tests/
+
+contracts/artifacts
+contracts/cache
+contracts/node_modules
