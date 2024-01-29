@@ -3,3 +3,6 @@
 build/_workspace
 build/_bin
 tests/testdata
+
+vendor
+contracts/node_modules

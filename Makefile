@@ -36,3 +36,6 @@ devtools:
 	env GOBIN= go install ./cmd/abigen
 	@type "solc" 2> /dev/null || echo 'Please install solc'
 	@type "protoc" 2> /dev/null || echo 'Please install protoc'
+
+docker-build-dev:
+	docker build -t go-ethereum-dev -f Dockerfile.dev .
