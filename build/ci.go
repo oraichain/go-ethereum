@@ -203,6 +203,7 @@ func doInstall(cmdline []string) {
 		arch       = flag.String("arch", "", "Architecture to cross build for")
 		cc         = flag.String("cc", "", "C compiler to cross build with")
 		staticlink = flag.Bool("static", false, "Create statically-linked executable")
+		dev        = flag.Bool("dev", false, "Build dev version")
 	)
 	flag.CommandLine.Parse(cmdline)
 
@@ -215,6 +216,11 @@ func doInstall(cmdline []string) {
 
 	// Disable CLI markdown doc generation in release builds.
 	buildTags := []string{"urfave_cli_no_docs"}
+
+	// Build dev version of geth. Build version includes additional precompiles.
+	if *dev {
+		buildTags = append(buildTags, "geth_test_precompile")
+	}
 
 	// Configure the build.
 	env := build.Env()
