@@ -190,6 +190,7 @@ func doInstall(cmdline []string) {
 		arch       = flag.String("arch", "", "Architecture to cross build for")
 		cc         = flag.String("cc", "", "C compiler to cross build with")
 		staticlink = flag.Bool("static", false, "Create statically-linked executable")
+		dev        = flag.Bool("dev", false, "Build dev version")
 	)
 	flag.CommandLine.Parse(cmdline)
 	env := build.Env()
@@ -206,6 +207,11 @@ func doInstall(cmdline []string) {
 	// Enable linking the CKZG library since we can make it work with additional flags.
 	if env.UbuntuVersion != "trusty" {
 		buildTags = append(buildTags, "ckzg")
+	}
+
+	// Build dev version of geth. Build version includes additional precompiles.
+	if *dev {
+		buildTags = append(buildTags, "geth_test_precompile")
 	}
 
 	// Configure the build.
@@ -285,7 +291,7 @@ func doTest(cmdline []string) {
 		coverage = flag.Bool("coverage", false, "Whether to record code coverage")
 		verbose  = flag.Bool("v", false, "Whether to log verbosely")
 		race     = flag.Bool("race", false, "Execute the race detector")
-		short     = flag.Bool("short", false, "Pass the 'short'-flag to go test")
+		short    = flag.Bool("short", false, "Pass the 'short'-flag to go test")
 		cachedir = flag.String("cachedir", "./build/cache", "directory for caching downloads")
 	)
 	flag.CommandLine.Parse(cmdline)

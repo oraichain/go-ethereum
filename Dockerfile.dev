@@ -1,0 +1,12 @@
+FROM golang:1.20-alpine
+
+RUN apk add bash make curl
+
+RUN mkdir -p $GOPATH/src/github.com/Kava-Labs/go-ethereum
+WORKDIR $GOPATH/src/github.com/Kava-Labs/go-ethereum
+
+COPY . .
+RUN make geth-dev
+RUN cp ./build/bin/geth $GOPATH/bin/
+
+CMD ["geth", "--dev", "--http", "--http.addr=0.0.0.0"]
