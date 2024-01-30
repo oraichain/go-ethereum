@@ -31,7 +31,9 @@ jobs:
         with:
           go-version: '1.21.4'
       - name: build all binaries from cmd
-        run: go run build/ci.go install
+        run: make all
+      - name: build dev version of geth
+        run: make geth-dev
 
   test:
     runs-on: ubuntu-latest
