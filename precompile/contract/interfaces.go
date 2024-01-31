@@ -22,7 +22,7 @@ type StatefulPrecompiledContract interface {
 		input []byte,
 		suppliedGas uint64,
 		readOnly bool,
-	) (ret []byte, err error)
+	) (ret []byte, remainingGas uint64, err error)
 }
 
 // AccessibleState defines the interface exposed to stateful precompile contracts
