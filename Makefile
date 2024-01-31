@@ -13,6 +13,11 @@ geth:
 	@echo "Done building."
 	@echo "Run \"$(GOBIN)/geth\" to launch geth."
 
+geth-dev:
+	$(GORUN) build/ci.go install -dev ./cmd/geth
+	@echo "Done building."
+	@echo "Run \"$(GOBIN)/geth\" to launch geth."
+
 all:
 	$(GORUN) build/ci.go install
 
@@ -48,3 +53,6 @@ devtools:
 	env GOBIN= go install ./cmd/abigen
 	@type "solc" 2> /dev/null || echo 'Please install solc'
 	@type "protoc" 2> /dev/null || echo 'Please install protoc'
+
+docker-build-dev:
+	docker build -t go-ethereum-dev -f Dockerfile.dev .
