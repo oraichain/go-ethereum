@@ -9,6 +9,11 @@ import (
 	"github.com/ethereum/go-ethereum/precompile/contract"
 )
 
+const (
+	calcSum3GasCost uint64 = contract.WriteGasCostPerSlot
+	getSum3GasCost  uint64 = contract.ReadGasCostPerSlot
+)
+
 // Singleton StatefulPrecompiledContract.
 var (
 	Sum3Precompile = createSum3Precompile()
@@ -44,7 +49,11 @@ func calcSum3(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
-) (ret []byte, err error) {
+) (ret []byte, remainingGas uint64, err error) {
+	if remainingGas, err = contract.DeductGas(suppliedGas, calcSum3GasCost); err != nil {
+		return nil, 0, err
+	}
+
 	// Set the nonce of the precompile's address (as is done when a contract is created) to ensure
 	// that it is marked as non-empty and will not be cleaned up when the statedb is finalized.
 	accessibleState.GetStateDB().SetNonce(ContractAddress, 1)
@@ -54,7 +63,7 @@ func calcSum3(
 	accessibleState.GetStateDB().SetCode(ContractAddress, []byte{0x1})
 
 	if len(input) != 96 {
-		return nil, fmt.Errorf("unexpected input length, want: 96, got: %v", len(input))
+		return nil, remainingGas, fmt.Errorf("unexpected input length, want: 96, got: %v", len(input))
 	}
 
 	var a, b, c, rez big.Int
@@ -67,7 +76,7 @@ func calcSum3(
 	StoreSum(accessibleState.GetStateDB(), &rez)
 
 	packedOutput := make([]byte, 0)
-	return packedOutput, nil
+	return packedOutput, remainingGas, nil
 }
 
 func getSum3(
@@ -77,14 +86,18 @@ func getSum3(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
-) (ret []byte, err error) {
+) (ret []byte, remainingGas uint64, err error) {
+	if remainingGas, err = contract.DeductGas(suppliedGas, getSum3GasCost); err != nil {
+		return nil, 0, err
+	}
+
 	sum, err := GetSum(accessibleState.GetStateDB())
 	if err != nil {
-		return nil, err
+		return nil, remainingGas, err
 	}
 
 	packedOutput := common.LeftPadBytes(sum.Bytes(), 32)
-	return packedOutput, nil
+	return packedOutput, remainingGas, nil
 }
 
 // createSum3Precompile returns a StatefulPrecompiledContract with getters and setters for the precompile.

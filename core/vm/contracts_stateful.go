@@ -28,8 +28,8 @@ func (w *wrappedPrecompiledContract) Run(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
-) (ret []byte, err error) {
-	return w.p.Run(input)
+) (ret []byte, remainingGas uint64, err error) {
+	return RunPrecompiledContract(w.p, input, suppliedGas)
 }
 
 // RunStatefulPrecompiledContract confirms runs [precompile] with the specified parameters.
@@ -41,6 +41,6 @@ func RunStatefulPrecompiledContract(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
-) (ret []byte, err error) {
+) (ret []byte, remainingGas uint64, err error) {
 	return precompile.Run(accessibleState, caller, addr, input, suppliedGas, readOnly)
 }

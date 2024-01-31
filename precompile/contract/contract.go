@@ -20,7 +20,7 @@ type RunStatefulPrecompileFunc func(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
-) (ret []byte, err error)
+) (ret []byte, remainingGas uint64, err error)
 
 // StatefulPrecompileFunction defines a function implemented by a stateful precompile
 type StatefulPrecompileFunction struct {
@@ -72,10 +72,10 @@ func (s *statefulPrecompileWithFunctionSelectors) Run(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
-) (ret []byte, err error) {
+) (ret []byte, remainingGas uint64, err error) {
 	// Otherwise, an unexpected input size will result in an error.
 	if len(input) < SelectorLen {
-		return nil, fmt.Errorf("missing function selector to precompile - input length (%d)", len(input))
+		return nil, suppliedGas, fmt.Errorf("missing function selector to precompile - input length (%d)", len(input))
 	}
 
 	// Use the function selector to grab the correct function
@@ -83,7 +83,7 @@ func (s *statefulPrecompileWithFunctionSelectors) Run(
 	functionInput := input[SelectorLen:]
 	function, ok := s.functions[string(selector)]
 	if !ok {
-		return nil, fmt.Errorf("invalid function selector %#x", selector)
+		return nil, suppliedGas, fmt.Errorf("invalid function selector %#x", selector)
 	}
 
 	return function.execute(accessibleState, caller, addr, functionInput, suppliedGas, readOnly)
