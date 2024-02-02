@@ -207,3 +207,46 @@ func TestSum3Precompile(t *testing.T) {
 		})
 	}
 }
+
+func TestSum3PrecompileInvalidCalls(t *testing.T) {
+	var (
+		stateDB         = state.NewTestStateDB(t)
+		accessibleState = newAccessibleState(stateDB)
+		contractAddr    = Module.Address
+		readOnly        bool
+	)
+
+	unexistingFuncInput := contract.CalculateFunctionSelector("unexistingFunc()")
+	invalidArgNumInput := contract.CalculateFunctionSelector("getSum3(uint256)")
+	shortFuncSelectorInput := []byte("abc")
+
+	for _, tc := range []struct {
+		desc  string
+		input []byte
+		err   string
+	}{
+		{
+			desc:  "test case #1",
+			input: unexistingFuncInput,
+			err:   "invalid function selector",
+		},
+		{
+			desc:  "test case #2",
+			input: invalidArgNumInput,
+			err:   "invalid function selector",
+		},
+		{
+			desc:  "test case #3",
+			input: shortFuncSelectorInput,
+			err:   "missing function selector to precompile",
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			{
+				_, _, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, tc.input, calcSum3GasCost, readOnly)
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.err)
+			}
+		})
+	}
+}
