@@ -113,12 +113,12 @@ func createSum3Precompile() contract.StatefulPrecompiledContract {
 	var functions []*contract.StatefulPrecompileFunction
 
 	functions = append(functions, contract.NewStatefulPrecompileFunction(
-		contract.CalculateFunctionSelector("calcSum3(uint256,uint256,uint256)"),
+		contract.MustCalculateFunctionSelector("calcSum3(uint256,uint256,uint256)"),
 		calcSum3,
 	))
 
 	functions = append(functions, contract.NewStatefulPrecompileFunction(
-		contract.CalculateFunctionSelector("getSum3()"),
+		contract.MustCalculateFunctionSelector("getSum3()"),
 		getSum3,
 	))
 

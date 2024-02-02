@@ -216,8 +216,8 @@ func TestSum3PrecompileInvalidCalls(t *testing.T) {
 		readOnly        bool
 	)
 
-	unexistingFuncInput := contract.CalculateFunctionSelector("unexistingFunc()")
-	invalidArgNumInput := contract.CalculateFunctionSelector("getSum3(uint256)")
+	unexistingFuncInput := contract.MustCalculateFunctionSelector("unexistingFunc()")
+	invalidArgNumInput := contract.MustCalculateFunctionSelector("getSum3(uint256)")
 	shortFuncSelectorInput := []byte("abc")
 
 	for _, tc := range []struct {

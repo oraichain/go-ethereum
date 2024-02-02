@@ -22,12 +22,12 @@ func TestPrecompileWithDuplicatedFunctionSelector(t *testing.T) {
 	var functions []*StatefulPrecompileFunction
 
 	functions = append(functions, NewStatefulPrecompileFunction(
-		CalculateFunctionSelector("test(uint256,uint256)"),
+		MustCalculateFunctionSelector("test(uint256,uint256)"),
 		test,
 	))
 
 	functions = append(functions, NewStatefulPrecompileFunction(
-		CalculateFunctionSelector("test(uint256,uint256)"),
+		MustCalculateFunctionSelector("test(uint256,uint256)"),
 		test,
 	))
 
