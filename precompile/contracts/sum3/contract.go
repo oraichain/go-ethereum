@@ -1,9 +1,11 @@
 package sum3
 
 import (
+	_ "embed"
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/precompile/contract"
@@ -16,6 +18,12 @@ const (
 
 // Singleton StatefulPrecompiledContract.
 var (
+	// Sum3RawABI contains the raw ABI of Sum3 contract.
+	//go:embed ISum3.abi
+	Sum3RawABI string
+
+	Sum3ABI = contract.ParseABI(Sum3RawABI)
+
 	Sum3Precompile = createSum3Precompile()
 )
 
@@ -120,4 +128,31 @@ func createSum3Precompile() contract.StatefulPrecompiledContract {
 		panic(err)
 	}
 	return statefulContract
+}
+
+type CalcSum3Input struct {
+	A *big.Int
+	B *big.Int
+	C *big.Int
+}
+
+// PackCalcSum3 packs [inputStruct] of type CalcSum3Input into the appropriate arguments for calcSum3.
+func PackCalcSum3(inputStruct CalcSum3Input) ([]byte, error) {
+	return Sum3ABI.Pack("calcSum3", inputStruct.A, inputStruct.B, inputStruct.C)
+}
+
+// PackGetSum3 packs the include selector (first 4 func signature bytes).
+func PackGetSum3() ([]byte, error) {
+	return Sum3ABI.Pack("getSum3")
+}
+
+// UnpackGetSum3Output attempts to unpack given [output] into the *big.Int type output
+// assumes that [output] does not include selector (omits first 4 func signature bytes)
+func UnpackGetSum3Output(output []byte) (*big.Int, error) {
+	res, err := Sum3ABI.Unpack("getSum3", output)
+	if err != nil {
+		return new(big.Int), err
+	}
+	unpacked := *abi.ConvertType(res[0], new(*big.Int)).(**big.Int)
+	return unpacked, nil
 }
