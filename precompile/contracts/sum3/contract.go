@@ -62,6 +62,8 @@ func calcSum3(
 		return nil, 0, err
 	}
 
+	// NOTE: this hack should NOT be used in production, initialization of a contract should happen only once
+	// after contract deployment (for ex. in a Cosmos SDK Begin Blocker).
 	// Set the nonce of the precompile's address (as is done when a contract is created) to ensure
 	// that it is marked as non-empty and will not be cleaned up when the statedb is finalized.
 	accessibleState.GetStateDB().SetNonce(ContractAddress, 1)
