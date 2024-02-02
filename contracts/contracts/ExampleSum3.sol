@@ -1,7 +1,5 @@
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-
 address constant PRECOMPILED_SUM3_CONTRACT_ADDRESS = address(0x0300000000000000000000000000000000000000);
 
 interface ISum3 {
