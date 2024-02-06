@@ -36,3 +36,37 @@ func TestPrecompileWithDuplicatedFunctionSelector(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "cannot create stateful precompile with duplicated function selector")
 }
+
+func TestPrecompileWithInvalidFunctionSelector(t *testing.T) {
+	for _, tc := range []struct {
+		desc       string
+		fnSelector []byte
+	}{
+		{
+			desc:       "empty selector",
+			fnSelector: []byte{},
+		},
+		{
+			desc:       "short selector",
+			fnSelector: []byte("abc"),
+		},
+		{
+			desc:       "long selector",
+			fnSelector: []byte("acbde"),
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			functions := []*StatefulPrecompileFunction{
+				NewStatefulPrecompileFunction(
+					tc.fnSelector,
+					test,
+				),
+			}
+
+			// Construct the contract with no fallback function.
+			_, err := NewStatefulPrecompileContract(functions)
+			require.Error(t, err)
+			require.Contains(t, err.Error(), "invalid length of function selector")
+		})
+	}
+}

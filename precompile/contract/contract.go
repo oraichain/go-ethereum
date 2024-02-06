@@ -53,6 +53,10 @@ func NewStatefulPrecompileContract(functions []*StatefulPrecompileFunction) (Sta
 		functions: make(map[string]*StatefulPrecompileFunction),
 	}
 	for _, function := range functions {
+		if len(function.selector) != SelectorLen {
+			return nil, fmt.Errorf("invalid length of function selector, want: %v, got: %v", SelectorLen, len(function.selector))
+		}
+
 		_, exists := contract.functions[string(function.selector)]
 		if exists {
 			return nil, fmt.Errorf("cannot create stateful precompile with duplicated function selector: %q", function.selector)
