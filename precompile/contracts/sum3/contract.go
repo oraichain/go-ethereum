@@ -22,7 +22,7 @@ var (
 	//go:embed ISum3.abi
 	Sum3RawABI string
 
-	Sum3ABI = contract.ParseABI(Sum3RawABI)
+	Sum3ABI = contract.MustParseABI(Sum3RawABI)
 
 	Sum3Precompile = createSum3Precompile()
 )
