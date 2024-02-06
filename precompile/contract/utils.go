@@ -36,9 +36,9 @@ func DeductGas(suppliedGas uint64, requiredGas uint64) (uint64, error) {
 	return suppliedGas - requiredGas, nil
 }
 
-// ParseABI parses the given ABI string and returns the parsed ABI.
+// MustParseABI parses the given ABI string and returns the parsed ABI.
 // If the ABI is invalid, it panics.
-func ParseABI(rawABI string) abi.ABI {
+func MustParseABI(rawABI string) abi.ABI {
 	parsed, err := abi.JSON(strings.NewReader(rawABI))
 	if err != nil {
 		panic(err)
