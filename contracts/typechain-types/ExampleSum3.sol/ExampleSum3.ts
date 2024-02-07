@@ -21,16 +21,38 @@ import type {
 } from "../common";
 
 export interface ExampleSum3Interface extends Interface {
-  getFunction(nameOrSignature: "calcSum3" | "getSum3"): FunctionFragment;
+  getFunction(
+    nameOrSignature:
+      | "calcSum3"
+      | "calcSum3Call"
+      | "getSum3"
+      | "getSum3StaticCall"
+  ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "calcSum3",
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "calcSum3Call",
+    values: [BigNumberish, BigNumberish, BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "getSum3", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "getSum3StaticCall",
+    values?: undefined
+  ): string;
 
   decodeFunctionResult(functionFragment: "calcSum3", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "calcSum3Call",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "getSum3", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getSum3StaticCall",
+    data: BytesLike
+  ): Result;
 }
 
 export interface ExampleSum3 extends BaseContract {
@@ -82,7 +104,15 @@ export interface ExampleSum3 extends BaseContract {
     "nonpayable"
   >;
 
+  calcSum3Call: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish, c: BigNumberish],
+    [string],
+    "nonpayable"
+  >;
+
   getSum3: TypedContractMethod<[], [bigint], "view">;
+
+  getSum3StaticCall: TypedContractMethod<[], [string], "view">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -96,8 +126,18 @@ export interface ExampleSum3 extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "calcSum3Call"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish, c: BigNumberish],
+    [string],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "getSum3"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getSum3StaticCall"
+  ): TypedContractMethod<[], [string], "view">;
 
   filters: {};
 }
