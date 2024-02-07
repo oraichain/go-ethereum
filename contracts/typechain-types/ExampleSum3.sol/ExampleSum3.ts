@@ -25,6 +25,7 @@ export interface ExampleSum3Interface extends Interface {
     nameOrSignature:
       | "calcSum3"
       | "calcSum3Call"
+      | "calcSum3DelegateCall"
       | "getSum3"
       | "getSum3StaticCall"
   ): FunctionFragment;
@@ -37,6 +38,10 @@ export interface ExampleSum3Interface extends Interface {
     functionFragment: "calcSum3Call",
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "calcSum3DelegateCall",
+    values: [BigNumberish, BigNumberish, BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "getSum3", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getSum3StaticCall",
@@ -46,6 +51,10 @@ export interface ExampleSum3Interface extends Interface {
   decodeFunctionResult(functionFragment: "calcSum3", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "calcSum3Call",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "calcSum3DelegateCall",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getSum3", data: BytesLike): Result;
@@ -110,6 +119,12 @@ export interface ExampleSum3 extends BaseContract {
     "nonpayable"
   >;
 
+  calcSum3DelegateCall: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish, c: BigNumberish],
+    [string],
+    "nonpayable"
+  >;
+
   getSum3: TypedContractMethod<[], [bigint], "view">;
 
   getSum3StaticCall: TypedContractMethod<[], [string], "view">;
@@ -127,6 +142,13 @@ export interface ExampleSum3 extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "calcSum3Call"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish, c: BigNumberish],
+    [string],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "calcSum3DelegateCall"
   ): TypedContractMethod<
     [a: BigNumberish, b: BigNumberish, c: BigNumberish],
     [string],

@@ -26,6 +26,15 @@ contract ExampleSum3 {
         return data;
     }
 
+    function calcSum3DelegateCall(uint256 a, uint256 b, uint256 c) public returns (bytes memory) {
+        bytes memory input = abi.encodeWithSelector(ISum3.calcSum3.selector, a, b, c);
+
+        (bool ok, bytes memory data) = address(PRECOMPILED_SUM3_CONTRACT_ADDRESS).delegatecall(input);
+        require(ok, "call to precompiled contract failed");
+
+        return data;
+    }
+
     function getSum3StaticCall() public view returns (bytes memory) {
         bytes memory input = abi.encodeWithSelector(ISum3.getSum3.selector);
 
