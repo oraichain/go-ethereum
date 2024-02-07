@@ -74,3 +74,22 @@ func TestRegisterModule(t *testing.T) {
 	registeredModules := RegisteredModules()
 	require.Equal(t, modules, registeredModules)
 }
+
+func TestRegisterModuleWithDuplicateAddress(t *testing.T) {
+	modules := []Module{
+		{
+			Address: common.BigToAddress(big.NewInt(0)),
+		},
+	}
+
+	err := RegisterModule(modules[0])
+	require.NoError(t, err)
+
+	err = RegisterModule(modules[0])
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "address 0x0000000000000000000000000000000000000000 already used by a stateful precompile")
+
+	// get all modules
+	registeredModules := RegisteredModules()
+	require.Equal(t, modules, registeredModules)
+}
