@@ -14,6 +14,14 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "ErrorExampleSum3",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ErrorExampleSum3__factory>;
+    getContractFactory(
+      name: "ErrorISum3",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ErrorISum3__factory>;
+    getContractFactory(
       name: "ExampleStatelessSum3",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ExampleStatelessSum3__factory>;
@@ -27,6 +35,16 @@ declare module "hardhat/types/runtime" {
     ): Promise<Contracts.ISum3__factory>;
 
     getContractAt(
+      name: "ErrorExampleSum3",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ErrorExampleSum3>;
+    getContractAt(
+      name: "ErrorISum3",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ErrorISum3>;
+    getContractAt(
       name: "ExampleStatelessSum3",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -43,6 +61,14 @@ declare module "hardhat/types/runtime" {
     ): Promise<Contracts.ISum3>;
 
     deployContract(
+      name: "ErrorExampleSum3",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ErrorExampleSum3>;
+    deployContract(
+      name: "ErrorISum3",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ErrorISum3>;
+    deployContract(
       name: "ExampleStatelessSum3",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ExampleStatelessSum3>;
@@ -55,6 +81,16 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ISum3>;
 
+    deployContract(
+      name: "ErrorExampleSum3",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ErrorExampleSum3>;
+    deployContract(
+      name: "ErrorISum3",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ErrorISum3>;
     deployContract(
       name: "ExampleStatelessSum3",
       args: any[],

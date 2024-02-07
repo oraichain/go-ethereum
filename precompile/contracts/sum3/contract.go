@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/precompile/contract"
+	"github.com/ethereum/go-ethereum/vmerrs"
 )
 
 const (
@@ -60,6 +61,9 @@ func calcSum3(
 ) (ret []byte, remainingGas uint64, err error) {
 	if remainingGas, err = contract.DeductGas(suppliedGas, calcSum3GasCost); err != nil {
 		return nil, 0, err
+	}
+	if readOnly {
+		return nil, remainingGas, vmerrs.ErrWriteProtection
 	}
 
 	// NOTE: this hack should NOT be used in production, initialization of a contract should happen only once
