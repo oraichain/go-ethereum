@@ -41,4 +41,19 @@ describe("Testing precompiled sum3 contract", function() {
         expected = "0x000000000000000000000000000000000000000000000000000000000000000f";
         expect(actual).to.equal(expected);
     })
+
+    it("Should properly calculate sum of 3 numbers (Call OpCode)", async function () {
+        const ExampleSum3 = await ethers.getContractFactory("ExampleSum3");
+        const exampleSum3 = await ExampleSum3.deploy();
+
+        await exampleSum3.calcSum3Call(2, 3, 4);
+        let actual: string = await exampleSum3.getSum3StaticCall();
+        let expected: string = "0x0000000000000000000000000000000000000000000000000000000000000009";
+        expect(actual).to.equal(expected);
+
+        await exampleSum3.calcSum3(3, 5, 7);
+        actual = await exampleSum3.getSum3();
+        expected = "0x000000000000000000000000000000000000000000000000000000000000000f";
+        expect(actual).to.equal(expected);
+    })
 })

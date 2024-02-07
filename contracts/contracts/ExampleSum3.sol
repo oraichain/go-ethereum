@@ -16,4 +16,22 @@ contract ExampleSum3 {
         uint256 result = ISum3(PRECOMPILED_SUM3_CONTRACT_ADDRESS).getSum3();
         return result;
     }
+
+    function calcSum3Call(uint256 a, uint256 b, uint256 c) public returns (bytes memory) {
+        bytes memory input = abi.encodeWithSelector(ISum3.calcSum3.selector, a, b, c);
+
+        (bool ok, bytes memory data) = address(PRECOMPILED_SUM3_CONTRACT_ADDRESS).call(input);
+        require(ok, "call to precompiled contract failed");
+
+        return data;
+    }
+
+    function getSum3StaticCall() public view returns (bytes memory) {
+        bytes memory input = abi.encodeWithSelector(ISum3.getSum3.selector);
+
+        (bool ok, bytes memory data) = address(PRECOMPILED_SUM3_CONTRACT_ADDRESS).staticcall(input);
+        require(ok, "call to precompiled contract failed");
+
+        return data;
+    }
 }
