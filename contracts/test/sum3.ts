@@ -51,8 +51,8 @@ describe("Testing precompiled sum3 contract", function() {
         let expected: string = "0x0000000000000000000000000000000000000000000000000000000000000009";
         expect(actual).to.equal(expected);
 
-        await exampleSum3.calcSum3(3, 5, 7);
-        actual = await exampleSum3.getSum3();
+        await exampleSum3.calcSum3Call(3, 5, 7);
+        actual = await exampleSum3.getSum3StaticCall();
         expected = "0x000000000000000000000000000000000000000000000000000000000000000f";
         expect(actual).to.equal(expected);
     })
