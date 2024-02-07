@@ -42,7 +42,7 @@ describe("Testing precompiled sum3 contract", function() {
         expect(actual).to.equal(expected);
     })
 
-    it("Should properly calculate sum of 3 numbers (Call OpCode)", async function () {
+    it("Should properly calculate sum of 3 numbers (Call & StaticCall OpCodes)", async function () {
         const ExampleSum3 = await ethers.getContractFactory("ExampleSum3");
         const exampleSum3 = await ExampleSum3.deploy();
 
@@ -55,5 +55,12 @@ describe("Testing precompiled sum3 contract", function() {
         actual = await exampleSum3.getSum3();
         expected = "0x000000000000000000000000000000000000000000000000000000000000000f";
         expect(actual).to.equal(expected);
+    })
+
+    it("Should fail because you can't call state-changing method with staticcall opcode", async function () {
+        const ErrorExampleSum3 = await ethers.getContractFactory("ErrorExampleSum3");
+        const errorExampleSum3 = await ErrorExampleSum3.deploy();
+
+        await expect(errorExampleSum3.calcSum3StaticCall(2, 3, 4)).to.be.revertedWith("call to precompiled contract failed");
     })
 })
