@@ -56,3 +56,6 @@ devtools:
 
 docker-build-dev:
 	docker build -t go-ethereum-dev -f Dockerfile.dev .
+
+abi:
+	solc --abi ./contracts/contracts/ExampleSum3.sol -o ./precompile/contracts/sum3 --overwrite

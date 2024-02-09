@@ -44,6 +44,8 @@ import (
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
 
+	_ "github.com/ethereum/go-ethereum/precompile/registry"
+
 	"github.com/urfave/cli/v2"
 )
 
