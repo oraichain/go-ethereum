@@ -1,11 +1,13 @@
 package contract_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/precompile/contract"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -143,4 +145,69 @@ func TestPrecompileInvalidCalls(t *testing.T) {
 			}
 		})
 	}
+}
+
+type stateDBWithExt struct {
+	contract.StateDB
+
+	customVal []byte
+}
+
+func newStateDBWithExt(t *testing.T, customVal []byte) *stateDBWithExt {
+	return &stateDBWithExt{
+		StateDB:   state.NewTestStateDB(t),
+		customVal: customVal,
+	}
+}
+
+func (s *stateDBWithExt) CustomValueExt() []byte {
+	return s.customVal
+}
+
+func TestPrecompileCustomStateDBExtension(t *testing.T) {
+	unsupportedErr := errors.New("unsupported statedb")
+
+	// test function that asserts a concrete type on the stateDB,
+	// and returns the return value of the extended type
+	testFunc := func(
+		accessibleState contract.AccessibleState,
+		caller common.Address,
+		addr common.Address,
+		input []byte,
+		suppliedGas uint64,
+		readOnly bool,
+	) ([]byte, uint64, error) {
+		customStateDB, ok := accessibleState.GetStateDB().(*stateDBWithExt)
+		if !ok {
+			return nil, suppliedGas, unsupportedErr
+		}
+
+		return customStateDB.CustomValueExt(), 0, nil
+	}
+
+	// create the precompiled contract with the testFunc
+	funcSelector := contract.MustCalculateFunctionSelector("getStateDBCustomValue()")
+	functions := []*contract.StatefulPrecompileFunction{
+		contract.NewStatefulPrecompileFunction(funcSelector, testFunc),
+	}
+	precompiledContract, err := contract.NewStatefulPrecompileContract(functions)
+	require.NoError(t, err)
+
+	// build the accessible state with the extended statedb
+	customVal := []byte("value from statedb extension")
+	accessibleState := newAccessibleState(newStateDBWithExt(t, customVal))
+
+	// run and see the returned value from calling CustomValueExt() on the injected statedb
+	retVal, remainingGas, err := precompiledContract.Run(accessibleState, callerAddr, contractAddr, funcSelector, 1, true)
+	require.NoError(t, err)
+	assert.Equal(t, uint64(0), remainingGas)
+	assert.Equal(t, customVal, retVal, "expected contract to access and return customVal from extended statedb")
+
+	// test contract with unsupported statedb
+	accessibleState = newAccessibleState(state.NewTestStateDB(t))
+	retVal, remainingGas, err = precompiledContract.Run(accessibleState, callerAddr, contractAddr, funcSelector, 1, true)
+	require.Error(t, err)
+	assert.Equal(t, unsupportedErr, err)
+	assert.Equal(t, uint64(1), remainingGas)
+	assert.Nil(t, retVal)
 }
