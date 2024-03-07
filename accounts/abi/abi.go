@@ -1,3 +1,8 @@
+// Copyright 2024 Kava Labs, Inc.
+// Copyright 2024 Ava Labs, Inc.
+//
+// Derived from https://github.com/ava-labs/subnet-evm@49b0e31
+//
 // Copyright 2015 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
@@ -82,6 +87,32 @@ func (abi ABI) Pack(name string, args ...interface{}) ([]byte, error) {
 	return append(method.ID, arguments...), nil
 }
 
+// Upstream implementation provides API for `pack inputs` and `unpack outputs`.
+// We extend API with `unpack inputs` functionality by adding getInputs and UnpackInput methods.
+// Perhaps in the future we extend API with `pack outputs` functionality.
+
+// getInputs gets method's inputs metadata by method name according to the ABI specification.
+// It can be used to decode encoded method's inputs.
+// getInputs and getArguments have similar implementations
+func (abi ABI) getInputs(name string) (Arguments, error) {
+	// since there can't be naming collisions with contracts and events,
+	// we need to decide whether we're calling a method or an event
+	var args Arguments
+	if method, ok := abi.Methods[name]; ok {
+		args = method.Inputs
+	}
+	if event, ok := abi.Events[name]; ok {
+		args = event.Inputs
+	}
+	if args == nil {
+		return nil, fmt.Errorf("abi: could not locate named method or event: %s", name)
+	}
+	return args, nil
+}
+
+// getArguments gets method's outputs metadata by method name according to the ABI specification.
+// It can be used to decode encoded method's outputs.
+// getInputs and getArguments have similar implementations.
 func (abi ABI) getArguments(name string, data []byte) (Arguments, error) {
 	// since there can't be naming collisions with contracts and events,
 	// we need to decide whether we're calling a method or an event
@@ -101,13 +132,39 @@ func (abi ABI) getArguments(name string, data []byte) (Arguments, error) {
 	return args, nil
 }
 
-// Unpack unpacks the output according to the abi specification.
+// UnpackInput unpacks the input according to the ABI specification.
+// UnpackInput and Unpack have similar implementations.
+func (abi ABI) UnpackInput(name string, data []byte) ([]interface{}, error) {
+	args, err := abi.getInputs(name)
+	if err != nil {
+		return nil, err
+	}
+	return args.Unpack(data)
+}
+
+// Unpack unpacks the output according to the ABI specification.
+// UnpackInput and Unpack have similar implementations.
 func (abi ABI) Unpack(name string, data []byte) ([]interface{}, error) {
 	args, err := abi.getArguments(name, data)
 	if err != nil {
 		return nil, err
 	}
 	return args.Unpack(data)
+}
+
+// UnpackInputIntoInterface unpacks the input in v according to the ABI specification.
+// It performs an additional copy. Please only use, if you want to unpack into a
+// structure that does not strictly conform to the ABI structure (e.g. has additional arguments)
+func (abi ABI) UnpackInputIntoInterface(v interface{}, name string, data []byte) error {
+	args, err := abi.getInputs(name)
+	if err != nil {
+		return err
+	}
+	unpacked, err := args.Unpack(data)
+	if err != nil {
+		return err
+	}
+	return args.Copy(v, unpacked)
 }
 
 // UnpackIntoInterface unpacks the output in v according to the abi specification.
