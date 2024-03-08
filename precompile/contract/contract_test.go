@@ -2,6 +2,7 @@ package contract_test
 
 import (
 	"errors"
+	"math/big"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -37,6 +38,7 @@ func test(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
+	value *big.Int,
 ) (ret []byte, remainingGas uint64, err error) {
 	return nil, 0, nil
 }
@@ -139,7 +141,7 @@ func TestPrecompileInvalidCalls(t *testing.T) {
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			{
-				_, _, err := precompiledContract.Run(accessibleState, callerAddr, contractAddr, tc.input, suppliedGas, readOnly)
+				_, _, err := precompiledContract.Run(accessibleState, callerAddr, contractAddr, tc.input, suppliedGas, readOnly, common.Big0)
 				require.Error(t, err)
 				require.Contains(t, err.Error(), tc.err)
 			}
@@ -176,6 +178,7 @@ func TestPrecompileCustomStateDBExtension(t *testing.T) {
 		input []byte,
 		suppliedGas uint64,
 		readOnly bool,
+		value *big.Int,
 	) ([]byte, uint64, error) {
 		customStateDB, ok := accessibleState.GetStateDB().(*stateDBWithExt)
 		if !ok {
@@ -198,14 +201,14 @@ func TestPrecompileCustomStateDBExtension(t *testing.T) {
 	accessibleState := newAccessibleState(newStateDBWithExt(t, customVal))
 
 	// run and see the returned value from calling CustomValueExt() on the injected statedb
-	retVal, remainingGas, err := precompiledContract.Run(accessibleState, callerAddr, contractAddr, funcSelector, 1, true)
+	retVal, remainingGas, err := precompiledContract.Run(accessibleState, callerAddr, contractAddr, funcSelector, 1, true, common.Big0)
 	require.NoError(t, err)
 	assert.Equal(t, uint64(0), remainingGas)
 	assert.Equal(t, customVal, retVal, "expected contract to access and return customVal from extended statedb")
 
 	// test contract with unsupported statedb
 	accessibleState = newAccessibleState(state.NewTestStateDB(t))
-	retVal, remainingGas, err = precompiledContract.Run(accessibleState, callerAddr, contractAddr, funcSelector, 1, true)
+	retVal, remainingGas, err = precompiledContract.Run(accessibleState, callerAddr, contractAddr, funcSelector, 1, true, common.Big0)
 	require.Error(t, err)
 	assert.Equal(t, unsupportedErr, err)
 	assert.Equal(t, uint64(1), remainingGas)

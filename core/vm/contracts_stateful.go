@@ -4,6 +4,8 @@
 package vm
 
 import (
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/precompile/contract"
 )
@@ -28,6 +30,7 @@ func (w *wrappedPrecompiledContract) Run(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
+	value *big.Int,
 ) (ret []byte, remainingGas uint64, err error) {
 	return RunPrecompiledContract(w.p, input, suppliedGas)
 }
@@ -41,6 +44,7 @@ func RunStatefulPrecompiledContract(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
+	value *big.Int,
 ) (ret []byte, remainingGas uint64, err error) {
-	return precompile.Run(accessibleState, caller, addr, input, suppliedGas, readOnly)
+	return precompile.Run(accessibleState, caller, addr, input, suppliedGas, readOnly, value)
 }

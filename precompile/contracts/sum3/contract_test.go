@@ -80,7 +80,7 @@ func TestCalcSum3GasCalculations(t *testing.T) {
 			input, err := PackCalcSum3(tc.calcSum3Input)
 			require.NoError(t, err)
 
-			ret, remainingGas, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, input, tc.suppliedGas, readOnly)
+			ret, remainingGas, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, input, tc.suppliedGas, readOnly, common.Big0)
 			if tc.err != "" {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), tc.err)
@@ -131,7 +131,7 @@ func TestGetSum3GasCalculations(t *testing.T) {
 			input, err := PackGetSum3()
 			require.NoError(t, err)
 
-			ret, remainingGas, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, input, tc.suppliedGas, readOnly)
+			ret, remainingGas, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, input, tc.suppliedGas, readOnly, common.Big0)
 			if tc.err != "" {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), tc.err)
@@ -185,7 +185,7 @@ func TestSum3Precompile(t *testing.T) {
 				input, err := PackCalcSum3(tc.calcSum3Input)
 				require.NoError(t, err)
 
-				ret, remainingGas, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, input, calcSum3GasCost, readOnly)
+				ret, remainingGas, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, input, calcSum3GasCost, readOnly, common.Big0)
 				require.NoError(t, err)
 				require.Empty(t, ret)
 				require.Equal(t, uint64(0), remainingGas)
@@ -196,7 +196,7 @@ func TestSum3Precompile(t *testing.T) {
 				input, err := PackGetSum3()
 				require.NoError(t, err)
 
-				ret, remainingGas, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, input, getSum3GasCost, readOnly)
+				ret, remainingGas, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, input, getSum3GasCost, readOnly, common.Big0)
 				require.NoError(t, err)
 
 				sum, err := UnpackGetSum3Output(ret)
@@ -243,7 +243,7 @@ func TestSum3PrecompileInvalidCalls(t *testing.T) {
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			{
-				_, _, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, tc.input, calcSum3GasCost, readOnly)
+				_, _, err := Module.Contract.Run(accessibleState, callerAddr, contractAddr, tc.input, calcSum3GasCost, readOnly, common.Big0)
 				require.Error(t, err)
 				require.Contains(t, err.Error(), tc.err)
 			}

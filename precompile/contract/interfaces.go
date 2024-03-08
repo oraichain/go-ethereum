@@ -21,6 +21,7 @@ type StatefulPrecompiledContract interface {
 		input []byte,
 		suppliedGas uint64,
 		readOnly bool,
+		value *big.Int,
 	) (ret []byte, remainingGas uint64, err error)
 }
 

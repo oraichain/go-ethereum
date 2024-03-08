@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"math/big"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -20,6 +21,7 @@ func (c *mockStatefulPrecompiledContract) Run(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
+	value *big.Int,
 ) (ret []byte, remainingGas uint64, err error) {
 	return []byte{}, 0, nil
 }

@@ -58,6 +58,7 @@ func calcSum3(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
+	value *big.Int,
 ) (ret []byte, remainingGas uint64, err error) {
 	if remainingGas, err = contract.DeductGas(suppliedGas, calcSum3GasCost); err != nil {
 		return nil, 0, err
@@ -100,6 +101,7 @@ func getSum3(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
+	value *big.Int,
 ) (ret []byte, remainingGas uint64, err error) {
 	if remainingGas, err = contract.DeductGas(suppliedGas, getSum3GasCost); err != nil {
 		return nil, 0, err

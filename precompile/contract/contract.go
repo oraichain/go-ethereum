@@ -5,6 +5,7 @@ package contract
 
 import (
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -20,6 +21,7 @@ type RunStatefulPrecompileFunc func(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
+	value *big.Int,
 ) (ret []byte, remainingGas uint64, err error)
 
 // StatefulPrecompileFunction defines a function implemented by a stateful precompile
@@ -76,6 +78,7 @@ func (s *statefulPrecompileWithFunctionSelectors) Run(
 	input []byte,
 	suppliedGas uint64,
 	readOnly bool,
+	value *big.Int,
 ) (ret []byte, remainingGas uint64, err error) {
 	// Otherwise, an unexpected input size will result in an error.
 	if len(input) < SelectorLen {
@@ -90,5 +93,5 @@ func (s *statefulPrecompileWithFunctionSelectors) Run(
 		return nil, suppliedGas, fmt.Errorf("invalid function selector %#x", selector)
 	}
 
-	return function.execute(accessibleState, caller, addr, functionInput, suppliedGas, readOnly)
+	return function.execute(accessibleState, caller, addr, functionInput, suppliedGas, readOnly, value)
 }
