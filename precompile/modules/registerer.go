@@ -48,3 +48,7 @@ func insertSortedByAddress(data []Module, stm Module) []Module {
 	sort.Sort(moduleArray(data))
 	return data
 }
+
+func ClearRegisteredModules() {
+	registeredModules = make([]Module, 0)
+}

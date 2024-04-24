@@ -18,6 +18,7 @@ package vm
 
 import (
 	"math/big"
+	"slices"
 	"sync/atomic"
 	"time"
 
@@ -65,6 +66,10 @@ func (evm *EVM) precompile(addr common.Address) (contract.StatefulPrecompiledCon
 	// Otherwise, check for the additionally configured precompiles.
 	module, ok := modules.GetPrecompileModuleByAddress(addr)
 	if !ok {
+		return nil, false
+	}
+	// Precompile is registered, check if it's enabled at this block height
+	if !slices.Contains(evm.enabledPrecompiles, addr) {
 		return nil, false
 	}
 
@@ -135,11 +140,14 @@ type EVM struct {
 	// available gas is calculated in gasCall* according to the 63/64 rule and later
 	// applied in opCall*.
 	callGasTemp uint64
+
+	enabledPrecompiles []common.Address
 }
 
 // NewEVM returns a new EVM. The returned EVM is not thread safe and should
 // only ever be used *once*.
 func NewEVM(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig *params.ChainConfig, config Config) *EVM {
+<<<<<<< HEAD
 	evm := &EVM{
 		Context:     blockCtx,
 		TxContext:   txCtx,
@@ -147,6 +155,31 @@ func NewEVM(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig
 		Config:      config,
 		chainConfig: chainConfig,
 		chainRules:  chainConfig.Rules(blockCtx.BlockNumber, blockCtx.Random != nil),
+=======
+	return NewEVMWithEnabledPrecompiles(blockCtx, txCtx, statedb, chainConfig, config, nil)
+}
+
+func NewEVMWithEnabledPrecompiles(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig *params.ChainConfig, config Config, enabledPrecompiles []common.Address) *EVM {
+	// If basefee tracking is disabled (eth_call, eth_estimateGas, etc), and no
+	// gas prices were specified, lower the basefee to 0 to avoid breaking EVM
+	// invariants (basefee < feecap)
+	if config.NoBaseFee {
+		if txCtx.GasPrice.BitLen() == 0 {
+			blockCtx.BaseFee = new(big.Int)
+		}
+		if txCtx.BlobFeeCap != nil && txCtx.BlobFeeCap.BitLen() == 0 {
+			blockCtx.BlobBaseFee = new(big.Int)
+		}
+	}
+	evm := &EVM{
+		Context:            blockCtx,
+		TxContext:          txCtx,
+		StateDB:            statedb,
+		Config:             config,
+		chainConfig:        chainConfig,
+		chainRules:         chainConfig.Rules(blockCtx.BlockNumber, blockCtx.Random != nil, blockCtx.Time),
+		enabledPrecompiles: enabledPrecompiles,
+>>>>>>> 4dbf48322 (Injecting enabled precompiles list to EVM)
 	}
 	evm.interpreter = NewEVMInterpreter(evm, config)
 	return evm
