@@ -27,6 +27,12 @@ func (c *mockStatefulPrecompiledContract) Run(
 func TestEvmIsPrecompileMethod(t *testing.T) {
 	var address = common.HexToAddress("0x0300000000000000000000000000000000000000")
 
+	t.Run("test NewEVM constructor", func(t *testing.T) {
+		modules.ClearRegisteredModules()
+		evm := NewEVM(BlockContext{}, TxContext{}, nil, params.TestChainConfig, Config{})
+		require.Nil(t, evm.enabledPrecompiles)
+	})
+
 	t.Run("not registered and not enabled", func(t *testing.T) {
 		modules.ClearRegisteredModules()
 		evm := NewEVMWithEnabledPrecompiles(BlockContext{}, TxContext{}, nil, params.TestChainConfig, Config{}, nil)
