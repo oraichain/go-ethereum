@@ -55,23 +55,27 @@ func (evm *EVM) precompile(addr common.Address) (contract.StatefulPrecompiledCon
 		precompiles = PrecompiledContractsHomestead
 	}
 
-	// Check the existing precompiles first
+	// Check the native stateless precompiles first
 	p, ok := precompiles[addr]
 	if ok {
 		return p, true
 	}
 
-	// Otherwise, check for the additionally configured precompiles.
+	// Otherwise, check for the additionally configured stateful precompiles
+	if !evm.isStatefulPrecompileEnabled(addr) {
+		return nil, false
+	}
 	module, ok := modules.GetPrecompileModuleByAddress(addr)
 	if !ok {
 		return nil, false
 	}
-	// Precompile is registered, check if it's enabled at this block height
-	if !slices.Contains(evm.enabledPrecompiles, addr) {
-		return nil, false
-	}
 
 	return module.Contract, true
+}
+
+// isStatefulPrecompileEnabled checks if stateful precompile is enabled at current block height
+func (evm *EVM) isStatefulPrecompileEnabled(addr common.Address) bool {
+	return slices.Contains(evm.enabledPrecompiles, addr)
 }
 
 // BlockContext provides the EVM with auxiliary information. Once provided
