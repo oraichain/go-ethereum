@@ -12,7 +12,7 @@ import (
 )
 
 func TestInsertSortedByAddress(t *testing.T) {
-	clearRegisteredModules()
+	ClearRegisteredModules()
 
 	data := make([]Module, 0)
 	// test that the module is registered in sorted order
@@ -42,7 +42,7 @@ func TestInsertSortedByAddress(t *testing.T) {
 }
 
 func TestRegisterModule(t *testing.T) {
-	clearRegisteredModules()
+	ClearRegisteredModules()
 
 	const moduleNum = 4
 	// create modules
@@ -80,7 +80,7 @@ func TestRegisterModule(t *testing.T) {
 }
 
 func TestRegisterModuleWithDuplicateAddress(t *testing.T) {
-	clearRegisteredModules()
+	ClearRegisteredModules()
 
 	modules := []Module{
 		{
@@ -98,8 +98,4 @@ func TestRegisterModuleWithDuplicateAddress(t *testing.T) {
 	// get all modules
 	registeredModules := RegisteredModules()
 	require.Equal(t, modules, registeredModules)
-}
-
-func clearRegisteredModules() {
-	registeredModules = make([]Module, 0)
 }

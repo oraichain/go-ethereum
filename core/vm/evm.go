@@ -18,6 +18,7 @@ package vm
 
 import (
 	"math/big"
+	"slices"
 	"sync/atomic"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -54,19 +55,27 @@ func (evm *EVM) precompile(addr common.Address) (contract.StatefulPrecompiledCon
 		precompiles = PrecompiledContractsHomestead
 	}
 
-	// Check the existing precompiles first
+	// Check the native stateless precompiles first
 	p, ok := precompiles[addr]
 	if ok {
 		return p, true
 	}
 
-	// Otherwise, check for the additionally configured precompiles.
+	// Otherwise, check for the additionally configured stateful precompiles
+	if !evm.isStatefulPrecompileEnabled(addr) {
+		return nil, false
+	}
 	module, ok := modules.GetPrecompileModuleByAddress(addr)
 	if !ok {
 		return nil, false
 	}
 
 	return module.Contract, true
+}
+
+// isStatefulPrecompileEnabled checks if stateful precompile is enabled at current block height
+func (evm *EVM) isStatefulPrecompileEnabled(addr common.Address) bool {
+	return slices.Contains(evm.enabledPrecompiles, addr)
 }
 
 // BlockContext provides the EVM with auxiliary information. Once provided
@@ -135,11 +144,17 @@ type EVM struct {
 	// available gas is calculated in gasCall* according to the 63/64 rule and later
 	// applied in opCall*.
 	callGasTemp uint64
+
+	enabledPrecompiles []common.Address
 }
 
 // NewEVM returns a new EVM. The returned EVM is not thread safe and should
 // only ever be used *once*.
 func NewEVM(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig *params.ChainConfig, config Config) *EVM {
+	return NewEVMWithEnabledPrecompiles(blockCtx, txCtx, statedb, chainConfig, config, nil)
+}
+
+func NewEVMWithEnabledPrecompiles(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig *params.ChainConfig, config Config, enabledPrecompiles []common.Address) *EVM {
 	// If basefee tracking is disabled (eth_call, eth_estimateGas, etc), and no
 	// gas prices were specified, lower the basefee to 0 to avoid breaking EVM
 	// invariants (basefee < feecap)
@@ -152,12 +167,13 @@ func NewEVM(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig
 		}
 	}
 	evm := &EVM{
-		Context:     blockCtx,
-		TxContext:   txCtx,
-		StateDB:     statedb,
-		Config:      config,
-		chainConfig: chainConfig,
-		chainRules:  chainConfig.Rules(blockCtx.BlockNumber, blockCtx.Random != nil, blockCtx.Time),
+		Context:            blockCtx,
+		TxContext:          txCtx,
+		StateDB:            statedb,
+		Config:             config,
+		chainConfig:        chainConfig,
+		chainRules:         chainConfig.Rules(blockCtx.BlockNumber, blockCtx.Random != nil, blockCtx.Time),
+		enabledPrecompiles: enabledPrecompiles,
 	}
 	evm.interpreter = NewEVMInterpreter(evm)
 	return evm

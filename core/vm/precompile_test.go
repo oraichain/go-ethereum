@@ -28,34 +28,115 @@ func (c *mockStatefulPrecompiledContract) Run(
 }
 
 func TestEvmIsPrecompileMethod(t *testing.T) {
-	evm := NewEVM(BlockContext{}, TxContext{}, nil, params.TestChainConfig, Config{})
+	var address = common.HexToAddress("0x0300000000000000000000000000000000000000")
 
-	var (
-		existingContractAddress   = common.HexToAddress("0x0300000000000000000000000000000000000000")
-		unexistingContractAddress = common.HexToAddress("0x0300000000000000000000000000000000000001")
-	)
+	t.Run("test NewEVM constructor", func(t *testing.T) {
+		modules.ClearRegisteredModules()
+		evm := NewEVM(BlockContext{}, TxContext{}, nil, params.TestChainConfig, Config{})
+		require.Nil(t, evm.enabledPrecompiles)
+	})
 
-	// check that precompile doesn't exist before registration
-	precompiledContract, ok := evm.precompile(existingContractAddress)
-	require.False(t, ok)
-	require.Nil(t, precompiledContract)
+	t.Run("not registered and not enabled", func(t *testing.T) {
+		modules.ClearRegisteredModules()
+		evm := NewEVMWithEnabledPrecompiles(BlockContext{}, TxContext{}, nil, params.TestChainConfig, Config{}, nil)
 
-	module := modules.Module{
-		Address:  existingContractAddress,
-		Contract: new(mockStatefulPrecompiledContract),
+		precompile, ok := evm.precompile(address)
+		require.False(t, ok)
+		require.Nil(t, precompile)
+	})
+
+	t.Run("registered but not enabled", func(t *testing.T) {
+		modules.ClearRegisteredModules()
+		evm := NewEVMWithEnabledPrecompiles(BlockContext{}, TxContext{}, nil, params.TestChainConfig, Config{}, nil)
+
+		module := modules.Module{
+			Address:  address,
+			Contract: new(mockStatefulPrecompiledContract),
+		}
+		err := modules.RegisterModule(module)
+		require.NoError(t, err)
+
+		precompile, ok := evm.precompile(address)
+		require.False(t, ok)
+		require.Nil(t, precompile)
+	})
+
+	t.Run("not registered but enabled", func(t *testing.T) {
+		modules.ClearRegisteredModules()
+		enabledPrecompiles := []common.Address{address}
+		evm := NewEVMWithEnabledPrecompiles(BlockContext{}, TxContext{}, nil, params.TestChainConfig, Config{}, enabledPrecompiles)
+
+		precompile, ok := evm.precompile(address)
+		require.False(t, ok)
+		require.Nil(t, precompile)
+	})
+
+	t.Run("registered and enabled", func(t *testing.T) {
+		modules.ClearRegisteredModules()
+		enabledPrecompiles := []common.Address{address}
+		evm := NewEVMWithEnabledPrecompiles(BlockContext{}, TxContext{}, nil, params.TestChainConfig, Config{}, enabledPrecompiles)
+
+		module := modules.Module{
+			Address:  address,
+			Contract: new(mockStatefulPrecompiledContract),
+		}
+		err := modules.RegisterModule(module)
+		require.NoError(t, err)
+
+		precompile, ok := evm.precompile(address)
+		require.True(t, ok)
+		require.NotNil(t, precompile)
+	})
+
+	addrs := func(hexAddrs []string) []common.Address {
+		addrs := make([]common.Address, len(hexAddrs))
+		for i, hexAddr := range hexAddrs {
+			addrs[i] = common.HexToAddress(hexAddr)
+		}
+		return addrs
 	}
-	err := modules.RegisterModule(module)
-	require.NoError(t, err)
 
-	// check that precompile exists after registration
-	precompiledContract, ok = evm.precompile(existingContractAddress)
-	require.True(t, ok)
-	require.NotNil(t, precompiledContract)
+	for _, tc := range []struct {
+		desc            string
+		registeredAddrs []common.Address
+		enabledAddrs    []common.Address
+		foundAddrs      []common.Address
+		notFoundAddrs   []common.Address
+	}{
+		{
+			desc:            "test case #1",
+			registeredAddrs: addrs([]string{"0x101", "0x102", "0x103", "0x104", "0x105"}),
+			enabledAddrs:    addrs([]string{"0x101", "0x103", "0x105"}),
+			foundAddrs:      addrs([]string{"0x101", "0x103", "0x105"}),
+			notFoundAddrs:   addrs([]string{"0x102", "0x104", "0x106"}),
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			modules.ClearRegisteredModules()
+			evm := NewEVMWithEnabledPrecompiles(BlockContext{}, TxContext{}, nil, params.TestChainConfig, Config{}, tc.enabledAddrs)
 
-	// check that precompile doesn't exist
-	precompiledContract, ok = evm.precompile(unexistingContractAddress)
-	require.False(t, ok)
-	require.Nil(t, precompiledContract)
+			for _, registeredAddr := range tc.registeredAddrs {
+				module := modules.Module{
+					Address:  registeredAddr,
+					Contract: new(mockStatefulPrecompiledContract),
+				}
+				err := modules.RegisterModule(module)
+				require.NoError(t, err)
+			}
+
+			for _, addr := range tc.foundAddrs {
+				precompile, ok := evm.precompile(addr)
+				require.True(t, ok)
+				require.NotNil(t, precompile)
+			}
+
+			for _, addr := range tc.notFoundAddrs {
+				precompile, ok := evm.precompile(addr)
+				require.False(t, ok)
+				require.Nil(t, precompile)
+			}
+		})
+	}
 }
 
 func TestActivePrecompiles(t *testing.T) {
