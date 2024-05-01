@@ -34,7 +34,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto/kzg4844"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/precompile/contract"
-	"github.com/ethereum/go-ethereum/precompile/modules"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -152,29 +151,19 @@ func init() {
 }
 
 // ActivePrecompiles returns the precompiles enabled with the current configuration.
-func ActivePrecompiles(rules params.Rules) (precompiles []common.Address) {
+func ActivePrecompiles(rules params.Rules) []common.Address {
 	switch {
 	case rules.IsCancun:
-		precompiles = PrecompiledAddressesCancun
+		return PrecompiledAddressesCancun
 	case rules.IsBerlin:
-		precompiles = PrecompiledAddressesBerlin
-
+		return PrecompiledAddressesBerlin
 	case rules.IsIstanbul:
-		precompiles = PrecompiledAddressesIstanbul
+		return PrecompiledAddressesIstanbul
 	case rules.IsByzantium:
-		precompiles = PrecompiledAddressesByzantium
+		return PrecompiledAddressesByzantium
 	default:
-		precompiles = PrecompiledAddressesHomestead
+		return PrecompiledAddressesHomestead
 	}
-
-	// TODO: Consider performance improvements here to prevent iteration & allocations on every call.
-	// NOTE: If using init to cache addresses, then some care should be taken to ensure all precompiles are
-	// registered before being cached here.
-	for _, precompile := range modules.RegisteredModules() {
-		precompiles = append(precompiles, precompile.Address)
-	}
-
-	return precompiles
 }
 
 // RunPrecompiledContract runs and evaluates the output of a precompiled contract.
