@@ -86,3 +86,4 @@ issues:
     - 'func `updateSomeNodes` is unused'
     - 'func `mapResolver.clear` is unused'
     - 'File is not `goimports`-ed'
+    - 'G601: Implicit memory aliasing in for loop.'
