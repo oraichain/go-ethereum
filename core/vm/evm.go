@@ -293,8 +293,9 @@ func (evm *EVM) CallCode(caller ContractRef, addr common.Address, input []byte, 
 	}
 
 	// It is allowed to call precompiles, even via delegatecall
+	contract := NewContract(caller, AccountRef(caller.Address()), value, gas)
 	if p, isPrecompile := evm.precompile(addr); isPrecompile {
-		ret, gas, err = RunStatefulPrecompiledContract(p, evm, caller.Address(), addr, input, gas, evm.interpreter.readOnly, value)
+		ret, gas, err = RunStatefulPrecompiledContract(p, evm, contract.CallerAddress, addr, input, gas, evm.interpreter.readOnly, value)
 	} else {
 		addrCopy := addr
 		// Initialise a new contract and set the code that is to be used by the EVM.
@@ -334,12 +335,13 @@ func (evm *EVM) DelegateCall(caller ContractRef, addr common.Address, input []by
 	}
 
 	// It is allowed to call precompiles, even via delegatecall
+	// Initialise a new contract and make initialise the delegate values
+	contract := NewContract(caller, AccountRef(caller.Address()), nil, gas).AsDelegate()
 	if p, isPrecompile := evm.precompile(addr); isPrecompile {
-		ret, gas, err = RunStatefulPrecompiledContract(p, evm, caller.Address(), addr, input, gas, evm.interpreter.readOnly, big0)
+		ret, gas, err = RunStatefulPrecompiledContract(p, evm, contract.CallerAddress, addr, input, gas, evm.interpreter.readOnly, big0)
 	} else {
 		addrCopy := addr
 		// Initialise a new contract and make initialise the delegate values
-		contract := NewContract(caller, AccountRef(caller.Address()), nil, gas).AsDelegate()
 		contract.SetCallCode(&addrCopy, evm.StateDB.GetCodeHash(addrCopy), evm.StateDB.GetCode(addrCopy))
 		ret, err = evm.interpreter.Run(contract, input, false)
 		gas = contract.Gas
